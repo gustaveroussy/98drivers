@@ -1,0 +1,14 @@
+author:
+    first_name: Sacha 
+    second_name: Schutz
+    email: sacha@labsquare.org
+institut:
+    name: "Gustave roussy"
+    url:  "https://www.gustaveroussy.fr/"
+
+basedir: /home/bioinfo/Dev/gustaveRoussy/datatest 
+resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest
+
+samples:
+    - Bone
+    - Uterus 
