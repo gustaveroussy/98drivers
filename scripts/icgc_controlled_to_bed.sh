@@ -16,4 +16,4 @@ FILE_DIR=$(dirname $FILENAME)
 #23		= total read count 
 
  
-zcat $FILENAME|awk 'BEGIN{OFS="\t"; FS="\t"}NR>1{print $9,$10,$10,$2,$16,$17,$23}'|gzip > $FILE_DIR/$BASE_NAME.bed.gz
+zcat $FILENAME|awk 'BEGIN{OFS="\t"; FS="\t"}NR>1{print $9,$10,$10,$2,$19,$20,$23}'|gzip > $FILE_DIR/$BASE_NAME.bed.gz

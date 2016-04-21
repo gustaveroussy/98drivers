@@ -6,9 +6,16 @@ institut:
     name: "Gustave roussy"
     url:  "https://www.gustaveroussy.fr/"
 
+annotation:
+  hg19Size: "hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes"
+  refGene: "hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
+
+
 basedir: /home/bioinfo/Dev/gustaveRoussy/datatest 
-resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest
+annodir: /home/DATA/snake
+
+
+
 
 samples:
-    - Bone
-    - Uterus 
+    - Pancreas 
