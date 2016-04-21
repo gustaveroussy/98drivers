@@ -7,9 +7,20 @@ configfile: "config.yaml"
 
 rule all:
 	input:
-		expand("{basedir}/{sample}.sorted.bed.gz.tbi", sample = config["samples"], basedir= config["basedir"]),
-		expand("{basedir}/{sample}.wgs_variation.bedgraph.png", sample = config["samples"], basedir= config["basedir"]) 
-		#expand("{basedir}/{sample}.feature_variation.bedgraph", sample = config["samples"], basedir= config["basedir"]) 
+		expand("{basedir}/{sample}.html", sample = config["samples"], basedir= config["basedir"])
+
+
+rule html:
+	input:
+		"{basedir}/{sample}.feature_variation.bedgraph.png",
+		"{basedir}/{sample}.wgs_variation.bedgraph.png"
+
+	output:
+		"{basedir}/{sample}.html"
+	shell:
+		"cp -r templates/* {wildcards.basedir} ;"
+		"python3 scripts/create_single_report.py {wildcards.sample} --basedir {wildcards.basedir} --template templates > {output}"
+
 
 		
 rule report:
@@ -55,6 +66,15 @@ rule feature_variation:
 		"{basedir}/{sample}.feature_variation.bedgraph"
 	shell:
 		"python3 scripts/feature_variation.py {input} -f features/features.bed > {output} 2> /dev/null" 
+
+rule plot_feature_variation:
+	input:
+		"{basedir}/{sample}.feature_variation.bedgraph"
+	output:
+		"{basedir}/{sample}.feature_variation.bedgraph.png"
+	shell:
+		"Rscript scripts/variation_plot.r {input}"
+	
 
 
 rule sortuniq:
