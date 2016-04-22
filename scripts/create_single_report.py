@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 def create_single_report(sample, basedir, template_dir):
 
 	j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
-	print(j2_env.get_template("single_report.html").render(title = "sacha"))
+	print(j2_env.get_template("single_report.html").render(sample = sample))
 
 
 

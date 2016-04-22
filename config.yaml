@@ -11,8 +11,9 @@ annotation:
   refGene: "hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz"
 
 
+features: features/features_exon_intron.bed
 basedir: /home/bioinfo/Dev/gustaveRoussy/datatest 
-annodir: /home/DATA/snake
+resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest/results
 
 
 

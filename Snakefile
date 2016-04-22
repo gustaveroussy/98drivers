@@ -1,98 +1,117 @@
 import os 
+import glob
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 HTTP = HTTPRemoteProvider()
 configfile: "config.yaml"
+
+# Create inputs from filename in basedir 
+samples = [re.sub(r'\.bed.gz','',i) for i in os.listdir(config["basedir"]) if re.match(r'.+.bed.gz', i) and os.path.isfile(os.path.join(config["basedir"],i))]
+
+
+# Create output dir 
+if not os.path.exists(config["resultdir"]):
+    os.makedirs(config["resultdir"])
 
 
 
 rule all:
 	input:
-		expand("{basedir}/{sample}.html", sample = config["samples"], basedir= config["basedir"])
+		expand("{resultdir}/{sample}.html", resultdir= config["resultdir"], sample = samples),
+		expand("{resultdir}/{sample}.wgs_variation.bedgraph.png", resultdir= config["resultdir"], sample = samples),
+		expand("{resultdir}/{sample}.feature_variation.bedgraph.png", resultdir= config["resultdir"], sample = samples),
+		expand("{resultdir}/{sample}.wgs_signature.bedgraph", resultdir= config["resultdir"], sample = samples)
+
 
 
 rule html:
 	input:
-		"{basedir}/{sample}.feature_variation.bedgraph.png",
-		"{basedir}/{sample}.wgs_variation.bedgraph.png"
+		"{resultdir}/{sample}.feature_variation.bedgraph.png",
+		"{resultdir}/{sample}.wgs_variation.bedgraph.png"
 
 	output:
-		"{basedir}/{sample}.html"
+		"{resultdir}/{sample}.html"
 	shell:
-		"cp -r templates/* {wildcards.basedir} ;"
-		"python3 scripts/create_single_report.py {wildcards.sample} --basedir {wildcards.basedir} --template templates > {output}"
+		"cp -r templates/* {wildcards.resultdir} ;"
+		"python3 scripts/create_single_report.py {wildcards.sample} --basedir {wildcards.resultdir} --template templates > {output}"
 
 
 		
 rule report:
 	input:
-		"{basedir}/{sample}.sorted.bed.gz.tbi"
+		"{resultdir}/{sample}.sorted.bed.gz.tbi"
 	output:
-		"{basedir}/{sample}.pdf"
+		"{resultdir}/{sample}.pdf"
 	shell:
 		"touch {output}"
 
 rule tabix:
 	input:
-		"{basedir}/{sample}.sorted.bed"
+		"{resultdir}/{sample}.sorted.bed"
 	output:
-		"{basedir}/{sample}.sorted.bed.gz",
-		"{basedir}/{sample}.sorted.bed.gz.tbi"
+		"{resultdir}/{sample}.sorted.bed.gz",
+		"{resultdir}/{sample}.sorted.bed.gz.tbi"
 	shell:
 		"bgzip -f {input} && "
 		"tabix -f -p bed {input}.gz"
 
 rule wgs_variation:
 	input:
-		"{basedir}/{sample}.sorted.bed.gz",
+		"{resultdir}/{sample}.sorted.bed.gz",
 	output:
-		"{basedir}/{sample}.wgs_variation.bedgraph"
+		"{resultdir}/{sample}.wgs_variation.bedgraph"
 	shell:
-		"python3 scripts/wgs_variation.py {input} --g features/hg19_chromosoms.bed --window 100000 -a uniq> {output} 2> /dev/null" 
+		"python3 scripts/wgs_variation.py {input} --g features/genom.bed --window 100000 -a uniq> {output} 2> /dev/null" 
 
 rule plot_wgs_variation:
 	input:
-		"{basedir}/{sample}.wgs_variation.bedgraph"
+		"{resultdir}/{sample}.wgs_variation.bedgraph"
 	output:
-		"{basedir}/{sample}.wgs_variation.bedgraph.png"
+		"{resultdir}/{sample}.wgs_variation.bedgraph.png"
 	shell:
 		"Rscript scripts/variation_plot.r {input}"
 	
+rule wgs_signature:
+	input:
+		"{resultdir}/{sample}.sorted.bed.gz",
+	output:
+		"{resultdir}/{sample}.wgs_signature.bedgraph"
+	shell:
+		"python3 scripts/wgs_signature.py {input} --g features/genom.bed --window 100000 > {output} 2> /dev/null" 
 
 
 rule feature_variation:
 	input:
-		"{basedir}/{sample}.sorted.bed.gz",
+		"{resultdir}/{sample}.sorted.bed.gz",
 	output:
-		"{basedir}/{sample}.feature_variation.bedgraph"
+		"{resultdir}/{sample}.feature_variation.bedgraph"
 	shell:
-		"python3 scripts/feature_variation.py {input} -f features/features.bed > {output} 2> /dev/null" 
+		"python3 scripts/feature_variation.py {input} -f {config[features]} > {output} 2> /dev/null" 
+
+
+
 
 rule plot_feature_variation:
 	input:
-		"{basedir}/{sample}.feature_variation.bedgraph"
+		"{resultdir}/{sample}.feature_variation.bedgraph"
 	output:
-		"{basedir}/{sample}.feature_variation.bedgraph.png"
+		"{resultdir}/{sample}.feature_variation.bedgraph.png"
 	shell:
 		"Rscript scripts/variation_plot.r {input}"
 	
 
 
 rule sortuniq:
+	params : basedir = config["basedir"]
 	input:
-		"{basedir}/{sample}.bed.gz"
+		config["basedir"] + "/{sample}.bed.gz"
 	output:
-		"{basedir}/{sample}.sorted.bed"
+		"{resultdir}/{sample}.sorted.bed"
 	shell:
 		"zcat {input}|sort -u|bedtools sort -i stdin > {output}"
 
 rule clean:
-	params: basedir = config["basedir"]
+	params: resultdir = config["resultdir"]
 	shell:
-		"rm -f {params.basedir}/*.sorted.bed.gz; "
-		"rm -f {params.basedir}/*.sorted.bed.gz.tbi; "
-		"rm -f {params.basedir}/*.pdf ; " 
-		"rm -f {params.basedir}/*.bedgraph ; "
-		"rm -f {params.basedir}/*.png ; "
-
+		"rm -rf {resultdir}"
 		" exit 0"
 
