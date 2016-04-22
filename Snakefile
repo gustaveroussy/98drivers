@@ -13,7 +13,7 @@ if not os.path.exists(config["resultdir"]):
     os.makedirs(config["resultdir"])
 
 
-
+# =================================== ALL FINAL FILES YOU WANT 
 rule all:
 	input:
 		expand("{resultdir}/{sample}.html", resultdir= config["resultdir"], sample = samples),
@@ -22,6 +22,7 @@ rule all:
 		expand("{resultdir}/{sample}.wgs_signature.bedgraph", resultdir= config["resultdir"], sample = samples)
 
 
+# =================================== REPORT 
 
 rule html:
 	input:
@@ -44,6 +45,8 @@ rule report:
 	shell:
 		"touch {output}"
 
+# =================================== TABIX 
+
 rule tabix:
 	input:
 		"{resultdir}/{sample}.sorted.bed"
@@ -53,6 +56,19 @@ rule tabix:
 	shell:
 		"bgzip -f {input} && "
 		"tabix -f -p bed {input}.gz"
+
+# =================================== SORT AND FILTER  
+
+rule sortuniq:
+	params : basedir = config["basedir"]
+	input:
+		config["basedir"] + "/{sample}.bed.gz"
+	output:
+		"{resultdir}/{sample}.sorted.bed"
+	shell:
+		"zcat {input}|sort -u|bedtools sort -i stdin > {output}"
+
+# =================================== ANALYSIS   
 
 rule wgs_variation:
 	input:
@@ -99,15 +115,7 @@ rule plot_feature_variation:
 		"Rscript scripts/variation_plot.r {input}"
 	
 
-
-rule sortuniq:
-	params : basedir = config["basedir"]
-	input:
-		config["basedir"] + "/{sample}.bed.gz"
-	output:
-		"{resultdir}/{sample}.sorted.bed"
-	shell:
-		"zcat {input}|sort -u|bedtools sort -i stdin > {output}"
+# =================================== CLEAN   
 
 rule clean:
 	params: resultdir = config["resultdir"]

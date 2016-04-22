@@ -5,10 +5,12 @@ import tabix
 import csv 
 from common import * 
 
-def compute_variation(
-		tabix_file,
-		feature_file, 
-		algorithm="std"):
+def compute_feature_variation(file, feature):
+	print("feature")
+
+
+def compute_wgs_variation(file, genom, window):
+	print("wgs")
 			
 	# # Create tabix object
 	# tx = tabix.open(tabix_file)
@@ -36,16 +38,29 @@ def compute_variation(
 
 
 	
-parser = argparse.ArgumentParser(
-	description="Compute mutation per feature. You can select how mutation are count by using algorithm", 
-	usage="python3 feature_variation.py --f feature.bed --a uniq file.bed.gz"
-	)
 
-parser.add_argument("file", 			type=str, help="bed.gz file indexed with tabix")
-parser.add_argument("-f","--feature", 	type=str, help="feature in bed format. (chr,start,end, type)", required=True)
-parser.add_argument("-a","--algorithm", type=str, help="'std':mutationCount/window. 'uniq':mutationCount/window*uniqPatient",choices=["std","uniq"], default="std")
+parser     = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(help='sub-command help', dest="command")
+
+
+wgs_parser = subparsers.add_parser("wgs", help="wgs")
+wgs_parser.add_argument('file', type=str, help="tabix file")
+wgs_parser.add_argument('--genom', type=str, help="")
+wgs_parser.add_argument('--window', type=int, help="")
+
+feature_parser = subparsers.add_parser("feature", help="feature")
+feature_parser.add_argument('file', type=str, help="tabix file")
+feature_parser.add_argument('--feature', type=str, help="")
 
 args = parser.parse_args()
 
-# Start algo 
-compute_feature_variation(args.file, args.feature, args.algorithm)
+
+if args.command == "wgs":
+	compute_wgs_variation(args.file, args.genom, args.window)
+
+if args.command == "feature":
+	compute_feature_variation(args.file, args.feature)
+
+
+
+
