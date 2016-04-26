@@ -8,22 +8,81 @@
 	<title>{{ title }} </title>
 </head>
 <body>
+
+
+
+
 	
-<div class="pure-menu pure-menu-horizontal">
-    <a href="#" class="pure-menu-heading"><img src="img/logo.png"></a>
-    <ul class="pure-menu-list">
-        <li class="pure-menu-item"><a href="#" class="pure-menu-link">Home</a></li>
-        <li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">Pricing</a></li>
-        <li class="pure-menu-item"><a href="#" class="pure-menu-link">Contact</a></li>
-    </ul>
-</div>
+	<div class="pure-menu pure-menu-horizontal">
+		<a href="#" class="pure-menu-heading"><img src="img/logo.png"></a>
+		<ul class="pure-menu-list">
+			<li class="pure-menu-item"><a href="#" class="pure-menu-link">Home</a></li>
+			<li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">Pricing</a></li>
+			<li class="pure-menu-item"><a href="#" class="pure-menu-link">Contact</a></li>
+		</ul>
+	</div>
+
+	<h1>{{sample}}</h1>
+	<h2>Stats</h2>
+
+	<table class="pure-table pure-table-horizontal">
+		<tbody>
+			<tr>
+				<td>Mutation count</td> <td>{{stats.mutationCount}}</td>
+			</tr>
+			<tr>
+				<td>Patient count</td> <td>{{stats.patientsCount}}</td>
+			</tr>
+			
+
+		</tbody>
+	</table>
 
 
-<h1>{{sample}}</h1>
 
 	<img src="{{sample}}.feature_variation.bedgraph.png">
 	<img src="{{sample}}.wgs_variation.bedgraph.png">
 
+
+	<h2>Region with high mutation</h2>
+	<table class="pure-table pure-table-horizontal">
+		<thead>
+			<tr>
+				<th>location</th>
+				<th>score</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			{% for item in wgs_max_table %}
+			<tr>
+				<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
+				<td>{{ item[3] }}</td>
+			</tr>
+			{% endfor %}
+
+		</tbody>
+	</table>
+
+	<h2>Peaks detection</h2>
+	<table class="pure-table pure-table-horizontal">
+		<thead>
+			<tr>
+				<th>location</th>
+				<th>score</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			{% for item in peak_table %}
+			<tr>
+				<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
+				<td>{{ item[3] }}</td>
+			</tr>
+			{% endfor %}
+
+		</tbody>
+	</table>
 
 
 

@@ -19,7 +19,6 @@ rule all:
 		expand("{resultdir}/{sample}.html", resultdir= config["resultdir"], sample = samples),
 		expand("{resultdir}/{sample}.wgs_variation.bedgraph.png", resultdir= config["resultdir"], sample = samples),
 		expand("{resultdir}/{sample}.feature_variation.bedgraph.png", resultdir= config["resultdir"], sample = samples),
-		expand("{resultdir}/{sample}.wgs_signature.bedgraph", resultdir= config["resultdir"], sample = samples)
 
 
 # =================================== REPORT 
@@ -27,7 +26,10 @@ rule all:
 rule html:
 	input:
 		"{resultdir}/{sample}.feature_variation.bedgraph.png",
-		"{resultdir}/{sample}.wgs_variation.bedgraph.png"
+		"{resultdir}/{sample}.wgs_variation.bedgraph.png",
+		"{resultdir}/{sample}.wgs_peak.bedgraph",
+		"{resultdir}/{sample}.stat"
+
 
 	output:
 		"{resultdir}/{sample}.html"
@@ -44,6 +46,14 @@ rule report:
 		"{resultdir}/{sample}.pdf"
 	shell:
 		"touch {output}"
+
+rule stat:
+	input:
+		"{resultdir}/{sample}.sorted.bed.gz"
+	output:
+		"{resultdir}/{sample}.stat"
+	shell:
+		"python3 scripts/stats.py {input} > {output}"
 
 # =================================== TABIX 
 
@@ -74,9 +84,25 @@ rule wgs_variation:
 	input:
 		"{resultdir}/{sample}.sorted.bed.gz",
 	output:
-		"{resultdir}/{sample}.wgs_variation.bedgraph"
+		"{resultdir}/{sample}.wgs_variation.bedgraph",
+		"{resultdir}/{sample}.wgs_variation.max.bed",
+
 	shell:
-		"python3 scripts/wgs_variation.py {input} --g features/genom.bed --window 100000 -a uniq> {output} 2> /dev/null" 
+		"python3 scripts/variation.py wgs {input} --g features/genom.bed --window 100000 -a uniq> {output[0]} 2> /dev/null;"
+		"source scripts/max_bedgraph.sh {output[0]} {config[wgs_variation_limit]} > {output[1]} " 
+
+
+rule wgs_peaks:
+	input:
+		"{resultdir}/{sample}.sorted.bed.gz"
+	output:
+		"{resultdir}/{sample}.wgs_peak.bedgraph"
+	shell:
+		"source scripts/detect_peaks.sh {input} {config[wgs_peaks_limit]} > {output}"
+
+
+
+
 
 rule plot_wgs_variation:
 	input:
@@ -92,16 +118,17 @@ rule wgs_signature:
 	output:
 		"{resultdir}/{sample}.wgs_signature.bedgraph"
 	shell:
-		"python3 scripts/wgs_signature.py {input} --g features/genom.bed --window 100000 > {output} 2> /dev/null" 
+		"python3 scripts/wgs_signature.py {input} --g features/genom.bed --window 100000 -a uniq  > {output} 2> /dev/null" 
 
 
 rule feature_variation:
 	input:
 		"{resultdir}/{sample}.sorted.bed.gz",
 	output:
-		"{resultdir}/{sample}.feature_variation.bedgraph"
+		"{resultdir}/{sample}.feature_variation.bedgraph",
+
 	shell:
-		"python3 scripts/feature_variation.py {input} -f {config[features]} > {output} 2> /dev/null" 
+		"python3 scripts/variation.py feature {input} -f {config[features]} > {output} 2> /dev/null" 
 
 
 
@@ -115,11 +142,10 @@ rule plot_feature_variation:
 		"Rscript scripts/variation_plot.r {input}"
 	
 
-# =================================== CLEAN   
+# =================================== ANALYSIS   
 
 rule clean:
-	params: resultdir = config["resultdir"]
 	shell:
-		"rm -rf {resultdir}"
+		"rm -rf {config[resultdir]}"
 		" exit 0"
 
