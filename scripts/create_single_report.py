@@ -7,10 +7,11 @@ import csv
 from jinja2 import Environment, FileSystemLoader
 
 
-def read_table(file):
+def read_bedgraph(file):
 	table = []
 	with open(file, "r") as file:
 		reader = csv.reader(file,delimiter="\t")
+		next(reader)
 		for line in reader:
 			table.append(line)	
 	return table 
@@ -22,6 +23,21 @@ def read_dict(file):
 		for line in reader:
 			dictionnary[line[0]] = line[1]
 	return dictionnary
+
+def read_table(file):
+	data = []
+	with open(file, "r") as file:
+		reader = csv.reader(file,delimiter="\t")
+		header = next(reader)
+
+		for line in reader:
+			item = {}
+			for index in range(len(header)):
+				item[header[index]] = line[index]
+
+			data.append(item)
+
+	return data
 
 
 
@@ -35,9 +51,11 @@ def create_single_report(sample, basedir, template_dir):
 
 	print(j2_env.get_template("single_report.html").render(
 	sample = sample, 
-	wgs_max_table = read_table("{basedir}/{sample}.wgs_variation.max.bed".format(basedir=basedir, sample=sample)),
-	peak_table    = read_table("{basedir}/{sample}.wgs_peak.bedgraph".format(basedir=basedir, sample=sample)),
-	stats         = read_dict("{basedir}/{sample}.stat".format(basedir=basedir, sample=sample))
+	wgs_max_table     = read_bedgraph("{basedir}/{sample}.wgs_variation.max.bedgraph".format(basedir=basedir, sample=sample)),
+	peak_max_table    = read_bedgraph("{basedir}/{sample}.wgs_peak.max.bedgraph".format(basedir=basedir, sample=sample)),
+	stats             = read_dict("{basedir}/{sample}.info".format(basedir=basedir, sample=sample)),
+	feature_stat      = read_table("{basedir}/feature.info".format(basedir=basedir))
+
 		))
 
 

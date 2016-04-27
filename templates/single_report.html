@@ -4,87 +4,200 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+	<style>
+
+		#content
+		{
+			width: 980px;
+			margin:auto;
+			background-color: white;
+
+		}
+
+		#signature 
+		{
+			width:100%;
+		}
+
+		#signature img
+		{
+			display:  inline-block;
+			background-color: red;
+		}
+
+		a {
+			color: #3B8BBA;
+			text-decoration: none;
+		}
+
+
+		#content table 
+		{
+			width: 100%;
+		}
+		#content h2 
+		{
+			margin: 2em 0px 1em;
+			font-weight: 300;
+			color: #888;
+			position: relative;
+		}
+
+		#content h1 
+		{
+			font-size: 300%;
+			font-weight: 100;
+			margin: 0px;
+		}
+
+	</style>
 
 	<title>{{ title }} </title>
 </head>
 <body>
 
 
+	<div id="content">
+
+		<h1>{{sample}}</h1>
+		<h2>Variants Stats</h2>
+
+		<table class="pure-table pure-table-bordered">
+			<tbody>
+				<tr><td>Patient count</td> <td>{{stats.patientsCount}}</td></tr
+					<tr><td>Mutation count</td> <td>{{stats.mutationCount}}</td></tr>
+					<tr><td>Cannonical count</td> <td>{{stats.cannMutationCount}}</td></tr>
+					<tr><td>C>T</td> <td>{{stats.CT}}</td></tr>
+					<tr><td>T>G</td> <td>{{stats.TG}}</td></tr>
+					<tr><td>T>A</td> <td>{{stats.TA}}</td></tr>
+					<tr><td>T>C</td> <td>{{stats.TC}}</td></tr>
+					<tr><td>C>A</td> <td>{{stats.CA}}</td></tr>
+					<tr><td>C>G</td> <td>{{stats.CG}}</td></tr>
+					<tr><td>transition</td> <td>{{stats.transition}}</td></tr>
+					<tr><td>transversion</td> <td>{{stats.transversion}}</td></tr>
+
+				</tbody>
+			</table>
 
 
-	
-	<div class="pure-menu pure-menu-horizontal">
-		<a href="#" class="pure-menu-heading"><img src="img/logo.png"></a>
-		<ul class="pure-menu-list">
-			<li class="pure-menu-item"><a href="#" class="pure-menu-link">Home</a></li>
-			<li class="pure-menu-item pure-menu-selected"><a href="#" class="pure-menu-link">Pricing</a></li>
-			<li class="pure-menu-item"><a href="#" class="pure-menu-link">Contact</a></li>
-		</ul>
-	</div>
+				<h2>Feature Stats</h2>
 
-	<h1>{{sample}}</h1>
-	<h2>Stats</h2>
+		<table class="pure-table pure-table-bordered">
 
-	<table class="pure-table pure-table-horizontal">
-		<tbody>
-			<tr>
-				<td>Mutation count</td> <td>{{stats.mutationCount}}</td>
-			</tr>
-			<tr>
-				<td>Patient count</td> <td>{{stats.patientsCount}}</td>
-			</tr>
+			<thead>
+					<tr>
+						<th>Feature</th>
+						<th>Count</th>
+						<th>Size (bp)</th>
+					</tr>
+				</thead>
+
+			<tbody>
+				{% for item in feature_stat %}
+				<tr>
+
+				<td>{{item['feature']}}</td> 
+				<td>{{item['count']}}</td> 
+				<td>{{item['size']}}</td> 
+
+
+				</tr>
+					{% endfor %}
+
+				</tbody>
+			</table>
+
+			<h2>Avaible files</h2>
+
+
+
+			<table class="pure-table pure-table-bordered">
+				<thead>
+					<tr>
+						<th>File</th>
+						<th>Description</th>
+
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+						<i class="fa fa-file-text-o" aria-hidden="true"></i>
+						<a href="{{sample}}.info">{{sample}}.info</a>
+						</td>
+						<td>Contains numerical description </td>
+					</tr>
+					<tr>
+						<td>
+						<i class="fa fa-file-archive-o" aria-hidden="true"></i>
+						<a href="{{sample}}.sorted.bed">{{sample}}.sorted.bed</a></td>
+						<td>Raw file </td>
+					</tr>
+					<tr>
+						<td>
+						<i class="fa fa-file-archive-o" aria-hidden="true"></i>
+						<a href="{{sample}}.sorted.bed.tbi">{{sample}}.sorted.bed.tbi</a>
+						</td>
+						<td>raw file </td>
+					</tr>
+
+				</tbody>
+			</table>
+
+
+			<h2>Whole genom signature</h2>
 			
+			<div id="signature">
+			<img src="{{sample}}.wgs_signature.png" alt="" >
+			<img src="{{sample}}.feature_signature.png" alt="">
+			</div>
 
-		</tbody>
-	</table>
+			<h2>Region with high mutation</h2>
+			<table class="pure-table pure-table-horizontal">
+				<thead>
+					<tr>
+						<th>location</th>
+						<th>score</th>
+					</tr>
+				</thead>
 
+				<tbody>
+					{% for item in wgs_max_table %}
+					<tr>
+						<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
+						<td>{{ item[3] }}</td>
+					</tr>
+					{% endfor %}
 
+				</tbody>
+			</table>
 
-	<img src="{{sample}}.feature_variation.bedgraph.png">
-	<img src="{{sample}}.wgs_variation.bedgraph.png">
+			<h2>Peaks detection</h2>
+			<table class="pure-table pure-table-horizontal">
+				<thead>
+					<tr>
+						<th>location</th>
+						<th>score</th>
+					</tr>
+				</thead>
 
+				<tbody>
+					{% for item in peak_max_table %}
+					<tr>
+						<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
+						<td>{{ item[3] }}</td>
+					</tr>
+					{% endfor %}
 
-	<h2>Region with high mutation</h2>
-	<table class="pure-table pure-table-horizontal">
-		<thead>
-			<tr>
-				<th>location</th>
-				<th>score</th>
-			</tr>
-		</thead>
-
-		<tbody>
-			{% for item in wgs_max_table %}
-			<tr>
-				<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
-				<td>{{ item[3] }}</td>
-			</tr>
-			{% endfor %}
-
-		</tbody>
-	</table>
-
-	<h2>Peaks detection</h2>
-	<table class="pure-table pure-table-horizontal">
-		<thead>
-			<tr>
-				<th>location</th>
-				<th>score</th>
-			</tr>
-		</thead>
-
-		<tbody>
-			{% for item in peak_table %}
-			<tr>
-				<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
-				<td>{{ item[3] }}</td>
-			</tr>
-			{% endfor %}
-
-		</tbody>
-	</table>
+				</tbody>
+			</table>
 
 
 
-</body>
-</html>
+		</div>
+
+
+	</body>
+	</html>

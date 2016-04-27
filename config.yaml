@@ -7,7 +7,7 @@ institut:
     url:  "https://www.gustaveroussy.fr/"
 
 
-features: features/features_exon_intron.bed
+features: features/features2.bed 
 basedir: /home/bioinfo/Dev/gustaveRoussy/datatest 
 resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest/results
 
