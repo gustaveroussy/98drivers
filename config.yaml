@@ -8,8 +8,8 @@ institut:
 
 
 features: features/features2.bed 
-basedir: /home/bioinfo/Dev/gustaveRoussy/datatest 
-resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest/results
+basedir: /home/bioinfo/Dev/gustaveRoussy/datatest/
+resultdir: /home/bioinfo/Dev/gustaveRoussy/datatest/results/
 
 wgs_variation_limit: 10  
 wgs_peaks_limit: 20 

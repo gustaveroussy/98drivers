@@ -1,181 +1,100 @@
+import config 
+import re 
 import os 
-import glob
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-HTTP = HTTPRemoteProvider()
-configfile: "config.yaml"
 
-# Create inputs from filename in basedir 
-samples = [re.sub(r'\.bed.gz','',i) for i in os.listdir(config["basedir"]) if re.match(r'.+.bed.gz', i) and os.path.isfile(os.path.join(config["basedir"],i))]
+# Create sample names
+samples = [] 
+for filename in os.listdir(config.basedir):
+	path = os.path.join(config.basedir, filename)
+	if re.match(r'.+.bed.gz', filename) and os.path.isfile(path):
+		samples.append(re.sub(r'\.bed.gz','',filename))
+
+
+
+# Create unknown feature 
+shell("rm -f {featuredir}/unknown.bed".format(featuredir = config.featuredir))
+
+# Create feature names
+features = []
+paths = []
+for filename in os.listdir(config.featuredir):
+	path = os.path.join(config.featuredir, filename)
+	if re.match(r'.+.bed', filename) and os.path.isfile(path):
+		features.append(re.sub(r'\.bed','',filename))
+		paths.append(path)
+
+features.append("unknown")
+
+shell("cat {file} > {featuredir}/unknown.bed".format(file = " ".join(paths), featuredir = config.featuredir ))
 
 
 # Create output dir 
-if not os.path.exists(config["resultdir"]):
-    os.makedirs(config["resultdir"])
+if not os.path.exists(config.outputdir):
+    os.makedirs(config.outputdir)
 
 
-# =================================== ALL FINAL FILES YOU WANT 
+
+
+
+
+
+
 rule all:
 	input:
-		expand("{resultdir}/{sample}.html", resultdir= config["resultdir"], sample = samples),
-		config["resultdir"]+"/feature.info"		
+		#expand("{outputdir}/{sample}.{feature}.info", outputdir = config.outputdir, feature = features,sample = samples),
+		expand("{outputdir}/Bone.info.plot", outputdir = config.outputdir, sample = samples) 
 
 
-# =================================== REPORT 
 
-rule html:
+
+rule sortuniq:
 	input:
-		"{resultdir}/{sample}.wgs_variation.png",
-		"{resultdir}/{sample}.wgs_signature.png",
-		"{resultdir}/{sample}.wgs_peak.max.bedgraph",
-		"{resultdir}/{sample}.wgs_variation.max.bedgraph",
-		"{resultdir}/{sample}.info",
-		"{resultdir}/feature.info"
-		
-
-
+		config.basedir + "/{sample}.bed.gz"
 	output:
-		"{resultdir}/{sample}.html"
+		"{outputdir}/{sample}.wgs.bed.gz"
 	shell:
-		"cp -r templates/* {wildcards.resultdir} ;"
-		"python3 scripts/create_single_report.py {wildcards.sample} --basedir {wildcards.resultdir} --template templates > {output}"
+		"zcat {input}|sort -u|bedtools sort -i stdin | bgzip > {output} "
 
 
-rule stat_variant:
+
+rule analysis:
 	input:
-		"{resultdir}/{sample}.sorted.bed.gz"
+		"{outputdir}/{sample}.{feature}.bed.gz"
 	output:
-		"{resultdir}/{sample}.info"
+		"{outputdir}/{sample}.{feature}.info"
 	shell:
-		"python3 scripts/stat_variant.py {input} > {output}"
+		"python3 scripts/analysis.py {input} > {output}"
 
-rule stat_feature:
+
+
+
+
+rule create_feature: 
 	input:
-		config["features"]
+		"{outputdir}/{sample}.wgs.bed.gz",
 	output:
-		"{resultdir}/feature.info"
-	shell:
-		"python3 scripts/stat_feature.py {input} > {output}"
+		"{outputdir}/{sample}.{feature}.bed.gz",
 
-# =================================== TABIX 
+	run:
+		if wildcards.feature == "unknown":
 
-rule tabix:
-	input:
-		"{resultdir}/{sample}.sorted.bed"
-	output:
-		"{resultdir}/{sample}.sorted.bed.gz",
-		"{resultdir}/{sample}.sorted.bed.gz.tbi"
-	shell:
-		"bgzip -f {input} && "
-		"tabix -f -p bed {input}.gz"
-
-# =================================== SORT AND FILTER  
-
-rule sortuniq:
-	params : basedir = config["basedir"]
-	input:
-		config["basedir"] + "/{sample}.bed.gz"
-	output:
-		"{resultdir}/{sample}.sorted.bed"
-	shell:
-		"zcat {input}|sort -u|bedtools sort -i stdin > {output}"
-
-# =================================== ANALYSIS   
-
-rule wgs_variation:
-	input:
-		"{resultdir}/{sample}.sorted.bed.gz",
-	output:
-		"{resultdir}/{sample}.wgs_variation.bedgraph",
-
-	shell:
-		"python3 scripts/variation.py wgs {input} --g features/genom.bed --window 100000 -a uniq> {output} 2> /dev/null;"
-
-
-rule wgs_variation_max:
-	input:
-		"{resultdir}/{sample}.wgs_variation.bedgraph",
-	output:
-		"{resultdir}/{sample}.wgs_variation.max.bedgraph",
-
-	shell:
-		"source scripts/max_bedgraph.sh {input} {config[wgs_variation_limit]} > {output} " 
-
-
-
-rule wgs_peaks_max:
-	input:
-		"{resultdir}/{sample}.sorted.bed.gz"
-	output:
-		"{resultdir}/{sample}.wgs_peak.max.bedgraph"
-	shell:
-		"source scripts/detect_peaks.sh {input} {config[wgs_peaks_limit]} > {output}"
-
-
-
-rule plot_wgs_variation:
-	input:
-		"{resultdir}/{sample}.wgs_variation.bedgraph"
-	output:
-		"{resultdir}/{sample}.wgs_variation.png"
-	shell:
-		"Rscript scripts/variation_plot.r {input}"
-	
-rule wgs_signature:
-	input:
-		"{resultdir}/{sample}.sorted.bed.gz",
-	output:
-		"{resultdir}/{sample}.wgs_signature.bedgraph"
-	shell:
-		"python3 scripts/signature.py {input}  > {output} 2> /dev/null" 
-
-rule feature_signature:
-	input:
-		"{resultdir}/{sample}.sorted.bed.gz",
-	output:
-		"{resultdir}/{sample}.feature_signature.bedgraph"
-	shell:
-		"python3 scripts/signature.py {input} -f {config[features]} > {output} 2> /dev/null" 
-
+			shell("bedtools subtract -a {input} -b {config.featuredir}/{wildcards.feature}.bed|bgzip > {output}")
+		else:
+			shell("bedtools intersect -a {input} -b {config.featuredir}/{wildcards.feature}.bed|bgzip > {output}")
 
 
 rule plot_signature:
-	input:
-		"{resultdir}/{sample}.wgs_signature.bedgraph",
-		"{resultdir}/{sample}.feature_signature.bedgraph",
+	input: 
+		"{outputdir}/{sample}.{feature}.info"
 	output:
-		"{resultdir}/{sample}.wgs_signature.png",
-		"{resultdir}/{sample}.feature_signature.png",
-
+		"{outputdir}/{sample}.{feature}.signature.png"
 	shell:
-		"Rscript scripts/signature_plot.r {input[0]}  > {output[0]};" 
-		"Rscript scripts/signature_plot.r {input[1]}  > {output[1]};" 
+		"Rscript scripts/signature_plot.r {input} {output}" 
 
 
-# rule feature_variation:
-# 	input:
-# 		"{resultdir}/{sample}.sorted.bed.gz",
-# 	output:
-# 		"{resultdir}/{sample}.feature_variation.bedgraph",
+rule plot_info : 
+	input:
+		expand("{outputdir}/Bone.{feature}.info", outputdir = config.outputdir, feature = features)
 
-# 	shell:
-# 		"python3 scripts/variation.py feature {input} -f {config[features]} > {output} 2> /dev/null" 
-
-
-
-
-# rule plot_feature_variation:
-# 	input:
-# 		"{resultdir}/{sample}.feature_variation.bedgraph"
-# 	output:
-# 		"{resultdir}/{sample}.feature_variation.bedgraph.png"
-# 	shell:
-# 		"Rscript scripts/variation_plot.r {input}"
-	
-
-# =================================== ANALYSIS   
-
-rule clean:
-	shell:
-		"rm -rf {config[resultdir]}"
-		" exit 0"
-
+	output:
+		config.outputdir+"/Bone.info.plot"

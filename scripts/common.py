@@ -117,5 +117,65 @@ def bartlett_window_coeff(x , width ):
 
 
 
+def compute_info(reader):
+	''' reader is an iterable containing chromosom, start, end, patient, ref, alt  '''
+	bases 			= ['A','C','G','T']
+	signature   	= {('C','T'): 0,('T','G'): 0,('T','A'): 0,('T','C'): 0,('C','A'): 0,('C','G'): 0}
+	cannoHit    	= 0
+	patients    	= set()
+	mutations   	= set()
+	transv_count 	= 0 
+	transi_count 	= 0 
+	size            = 0 
+
+
+	for row in reader:
+		chromosom = row[0]
+		start     = int(row[1])
+		end       = int(row[2])
+		patient   = row[3]
+		ref       = row[4].upper()
+		alt       = row[5].upper()
+
+
+		# Count patients 
+		patients.add(patient)
+		mutations.add((chromosom,start,end,ref,alt))
+
+		# Count cannonical SNP
+		if ref in bases and alt in bases and ref != alt:
+			ref, alt = cannonic_mutation((ref,alt))
+
+			if (ref,alt) in signature:
+				signature[(ref,alt)] += 1 
+
+
+	# Count cannonical hit 
+	canno_mutation_count	= sum(signature[key] for key in signature)
+	transition				= signature[('C','T')] + signature[('T','C')] 
+	transversion			= canno_mutation_count - transition
+
+
+	output = {}
+
+	output["patient_count"]  		=  len(patients)
+	output["mutation_count"] 		= len(mutations)
+	output["canno_mutation_count"] 	= canno_mutation_count
+	output["transition"] 			= transition
+	output["transversion"] 			= transversion
+
+	for key in signature.keys():
+		output[key[0]+key[1]] = signature[key] 
+
+	return output
+
+
+
+
+
+
+
+
+
 
 
