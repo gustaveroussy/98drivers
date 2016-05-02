@@ -11,6 +11,7 @@ from common import *
 def run_analysis(file):
 
 	basename 			= os.path.basename(file).split(".")[0]
+	feature  			= os.path.basename(file).split(".")[1]
 
 	with gzip.open(file,'r') as file:
 		reader 			= csv.reader(io.TextIOWrapper(file, newline=""), delimiter='\t')
@@ -19,12 +20,12 @@ def run_analysis(file):
 		for key in sorted(output.keys()):
 			print(key, end="\t")
 
-		print("")
+		print("feature")
 
 		for key in sorted(output.keys()):
 			print(output[key], end="\t")
 
-		print("")
+		print(feature)
 
 
 		

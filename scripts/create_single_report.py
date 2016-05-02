@@ -49,12 +49,12 @@ def create_single_report(sample, basedir, template_dir):
 	# Read wgs_max_score 
 
 
-	print(j2_env.get_template("single_report.html").render(
-	sample = sample, 
-	wgs_max_table     = read_bedgraph("{basedir}/{sample}.wgs_variation.max.bedgraph".format(basedir=basedir, sample=sample)),
-	peak_max_table    = read_bedgraph("{basedir}/{sample}.wgs_peak.max.bedgraph".format(basedir=basedir, sample=sample)),
-	stats             = read_dict("{basedir}/{sample}.info".format(basedir=basedir, sample=sample)),
-	feature_stat      = read_table("{basedir}/feature.info".format(basedir=basedir))
+	print(j2_env.get_template("test.html").render(
+	sample = sample,
+	# wgs_max_table     = read_bedgraph("{basedir}/{sample}.wgs_variation.max.bedgraph".format(basedir=basedir, sample=sample)),
+	# peak_max_table    = read_bedgraph("{basedir}/{sample}.wgs_peak.max.bedgraph".format(basedir=basedir, sample=sample)),
+	# stats             = read_dict("{basedir}/{sample}.info".format(basedir=basedir, sample=sample)),
+	# feature_stat      = read_table("{basedir}/feature.info".format(basedir=basedir))
 
 		))
 

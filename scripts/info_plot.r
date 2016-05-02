@@ -1,12 +1,12 @@
 library(RColorBrewer)
 
 
-#filename = "test.feature.info"
+filename = "Bone.all.info"
 
 
-args <- commandArgs(trailingOnly = TRUE)
-filename = args[1]
-output   = args[2]
+# args <- commandArgs(trailingOnly = TRUE)
+# filename = args[1]
+# output   = args[2]
 
 raw      = read.csv(filename, header = T, sep = "\t")
 
