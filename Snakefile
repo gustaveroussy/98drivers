@@ -48,19 +48,6 @@ if not os.path.exists("output/"):
 
 
 
-rule html:
-	input :
-		"{sample}.bed.gz",
-		"output/{sample}.wgs.peaks.annotated.bed",
-		lambda w : expand("output/{sample}.{feature}.signature.png", feature = features, sample = w.sample)
-
-	output:
-		"output/{sample}.html" 
-	shell:
-		"cp -r templates/* output/;"
-		"python3 scripts/create_single_report.py {wildcards.sample} --basedir output --template templates > {output}"
-
-
 
 # Filter and sort  
 rule sortuniq:
@@ -146,7 +133,16 @@ rule coverage_feature:
 	output:
 		"output/{feature}.coverage"
 	shell:
-		"bedtools genomecov -i {input} -max 1 > {output}"
+		"bedtools genomecov -i {input} -g scripts/hg19.sizes -max 1 > {output}"
+
+# plot coverage feature 
+rule plot_coverage_feature:
+	input:
+		"output/{feature}.coverage"
+	output:
+		"output/{feature}.coverage.png"
+	shell:
+		"Rscript scripts/coverage_plot.r {input} {output}"
 
 
 # detect peaks 
@@ -158,6 +154,7 @@ rule detect_peak:
 	shell: # Detect peaks with more than 4 patients same 
 		"source scripts/detect_peaks.sh {input} 4 > {output}"
 
+# annotate peak, does peak contains features 
 rule annotate_peak:
 	input:
 		peak    = "output/{sample}.wgs.peaks.bed",
@@ -166,9 +163,26 @@ rule annotate_peak:
 	params:
 		fnames  = " ".join(features)
 	output:
+		temp("output/{sample}.wgs.peaks.annotated.bed.withoutheader"),
 		"output/{sample}.wgs.peaks.annotated.bed"
 	shell: 
-		"bedtools annotate -names {params.fnames} -i {input.peak} -files {input.fpath} > {output}"
+		"bedtools annotate -names {params.fnames} -i {input.peak} -files {input.fpath} > {output[0]};"
+		"cat {output[0]}|sed '1s/#/chromosom\t/1;1s/\t/start\t/2;1s/\t/end\t/3;1s/\t/score\t/4;1s/.$//' > {output[1]}"
+
+
+rule html:
+	input :
+		"output/{sample}.wgs.peaks.annotated.bed",
+		"output/{sample}.wgs.signature.png",
+		"output/{sample}.all.signature.png",
+		expand("output/{feature}.coverage.png", feature = features),
+		lambda w : expand("output/{sample}.{feature}.signature.png", feature = features, sample = w.sample)
+
+	output:
+		"output/{sample}.html" 
+	shell:
+		"cp -r templates/* output/;"
+		"python3 scripts/create_single_report.py {wildcards.sample} --basedir output --template templates > {output}"
 
 
 
