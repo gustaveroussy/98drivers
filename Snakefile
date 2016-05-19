@@ -29,6 +29,59 @@ rule tabix:
 	shell:
 		"tabix -p bed {input}"
 
+
+# Count mutation rate 
+rule count :
+	input:
+		"{name}.bed.gz"
+	output:
+		"{name}.count"
+	shell:
+		"python3 scripts/sliding_window.py Pancreas.bed.gz -g {config.genome_sizes} -w {config.mutation_range} > {output}"
+
+# Compute signature 
+rule signature:
+	input:
+		"{name}.bed.gz"
+	output:
+		"{name}.signature"
+	shell:
+		"python3 scripts/signature.py {input} > {output}"
+
+# Compute stats 
+rule stats:
+	input:
+		"{name}.bed.gz"
+	output:
+		"{name}.stat"
+	shell:
+		"python3 scripts/stats.py {input} > {output}"
+
+
+# Split features
+rule split:
+	input:
+		src  ="{name}.bed.gz",
+		fpath="features/{feature_name}.bed"
+	output:
+		"{name}.{feature_name}.bed.gz"
+	shell:
+		"bedtools intersect -a {input.src} -b {input.fpath} |bgzip > {output}"
+
+# Compute feature count 
+rule feature_count:
+	input:
+		expand("{fpath}", fpath=config.features)
+	output:
+		"features.coverage"
+	run:
+		for f in input:
+			name = os.path.basename(f)[:-4]
+			shell("echo '{name}\t'$(bedtools sort -i {f}|bedtools merge -i stdin|awk '{{print $3-$2}}'|paste -sd+|bc) >> {output}")
+
+
+
+
 rule detect_cluster:
 	input:
 		"{name}.bed.gz"

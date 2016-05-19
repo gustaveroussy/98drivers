@@ -13,7 +13,7 @@ def chromosom_sizes(hg19_size_file):
 	with open(hg19_size_file) as file:
 		reader = csv.reader(file, delimiter="\t")
 		for line in reader:
-			results[line[0]] = int(line[2])
+			results[line[0]] = int(line[1])
 	return results
 
 
@@ -24,7 +24,7 @@ def count_mutation_ratio_std(tabix, chromosom:str, start , end:int):
 	for i in tabix.query(chromosom, start, end):
 		hit+=1 
 
-	return float(hit) / float(size) * 100
+	return hit
 
 def count_mutation_ratio_uniq(tabix, chromosom:str, start , end:int, patientField = 3):
 	''' count hit / size * uniqPatient ''' 
@@ -36,7 +36,7 @@ def count_mutation_ratio_uniq(tabix, chromosom:str, start , end:int, patientFiel
 		uniqList.add(record[patientField])
 		hit+=1 
 
-	return (float(hit) / float(size)) * len(uniqList) * 100
+	return len(uniqList)
 
 def count_mutation_ratio_bartlett(tabix, chromosom:str, start , end:int):
 	size = end - start
@@ -45,7 +45,7 @@ def count_mutation_ratio_bartlett(tabix, chromosom:str, start , end:int):
 		s = int(record[1]) - start 
 		score += bartlett_window_coeff(s, size)
 
-	return score / size * 100 
+	return score
 
 def count_mutation(tabix, chromosom:str, start , end:int, algorithm = "std"):
 	if algorithm == "std":

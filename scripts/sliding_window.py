@@ -4,43 +4,30 @@ import os
 from common import * 
 
 def sliding_window(tabix_file, genom, window ):
-	sizes = chromosom_sizes(genom)
+	sizes 	= chromosom_sizes(genom)
+	tx 		= tabix.open(tabix_file)
 
-	tx = tabix.open(tabix_file)
+	for chromosom in sizes:
+		for position in range(0,sizes[chromosom] - window, window):
+			start  			= position
+			end    			= position + window 
+			count  			= count_mutation_ratio_std(tx, chromosom, start , end)
+			distinct_count  = count_mutation_ratio_uniq(tx, chromosom, start ,end,3)
 
-	chromosom = "chr12"
-	print("track type=\"bedGraph name={name}\" description=\"sliding window\"".format(name=os.path.basename(tabix_file)))
-
-	for position in range(0, sizes[chromosom] - window):
-		start  = position
-		end    = position + window 
-		middle = start + window/2 
-		score  = 0 
-
-		#percent = start / sizes[chromosom] * 100 
-
-		# if int(percent * 100) % 2 : 
-		# 	print(round(percent, 2), "%") 
+			print(chromosom,start,end,count, distinct_count, sep="\t")
 
 
-		for record in tx.query(chromosom, start, end):
-			s      = int(record[1]) - start 
-			score += bartlett_window_coeff(s, window)
-				
+
+	# for position in range(0, sizes[chromosom] - window):
+	# 	start  = position
+	# 	end    = position + window 
+	# 	middle = start + window/2 
 		
-		if score != 0:
-			print(chromosom,middle,middle+1,score, sep="\t")
+	# 	count_mutation_ratio_std(tx, chromosom:str, start , end:int):
 
+		
+	
 			
-
-
-
-
-
-			
-
-
-
 
 parser = argparse.ArgumentParser(
 	description="wgs sliding window ", 

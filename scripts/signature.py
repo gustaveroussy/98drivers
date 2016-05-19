@@ -39,8 +39,8 @@ def wgs_signature(file):
 				
 
 
-		print("feature","CT","CG","CA","TC","TA","TG", sep="\t")
-		print("wgs",
+		print("CT","CG","CA","TC","TA","TG", sep="\t")
+		print(
 			mutations[('C','T')]/ hit,
 			mutations[('C','G')]/ hit,
 			mutations[('C','A')]/ hit,
@@ -52,62 +52,62 @@ def wgs_signature(file):
 
 #==========================================================================
 
-def feature_signature(file, feature):
+# def feature_signature(file, feature):
 
-	with open(feature, "r") as feature_file:
-		tx = tabix.open(file)
-		bases = ['A','C','G','T']
-		mutation_content   = {
-					('C','T'): 0,
-					('T','G'): 0,
-					('T','A'): 0,
-					('T','C'): 0,
-					('C','A'): 0,
-					('C','G'): 0
-					}
+# 	with open(feature, "r") as feature_file:
+# 		tx = tabix.open(file)
+# 		bases = ['A','C','G','T']
+# 		mutation_content   = {
+# 					('C','T'): 0,
+# 					('T','G'): 0,
+# 					('T','A'): 0,
+# 					('T','C'): 0,
+# 					('C','A'): 0,
+# 					('C','G'): 0
+# 					}
 
-		mutations = { }
-		hits = {}
+# 		mutations = { }
+# 		hits = {}
 
-		reader = csv.reader(feature_file, delimiter="\t")
-		# Loop over features 
-		for line in reader:
-			chromosom = line[0]
-			start     = int(line[1])
-			end       = int(line[2])
-			feature   = line[3]
+# 		reader = csv.reader(feature_file, delimiter="\t")
+# 		# Loop over features 
+# 		for line in reader:
+# 			chromosom = line[0]
+# 			start     = int(line[1])
+# 			end       = int(line[2])
+# 			feature   = line[3]
 
-			if feature not in mutations:
-				mutations[feature] = dict(mutation_content)
-				hits[feature] = 0
+# 			if feature not in mutations:
+# 				mutations[feature] = dict(mutation_content)
+# 				hits[feature] = 0
 
-			# For each features, ask tabix 
-			try: 
-				records = tx.query(chromosom,start, end)
-				for record in records : 
-					ref = record[4].upper()
-					alt = record[5].upper()
+# 			# For each features, ask tabix 
+# 			try: 
+# 				records = tx.query(chromosom,start, end)
+# 				for record in records : 
+# 					ref = record[4].upper()
+# 					alt = record[5].upper()
 
-					if ref in bases and alt in bases and ref != alt:
-						ref,alt = cannonic_mutation((ref,alt))
+# 					if ref in bases and alt in bases and ref != alt:
+# 						ref,alt = cannonic_mutation((ref,alt))
 
-						mutations[feature][(ref,alt)] += 1 
-						hits[feature] += 1	
+# 						mutations[feature][(ref,alt)] += 1 
+# 						hits[feature] += 1	
 
-			except Exception as e :
-				print(e, file = sys.stderr)
-				print("cannot tabix ", chromosom, start, end, file = sys.stderr)
+# 			except Exception as e :
+# 				print(e, file = sys.stderr)
+# 				print("cannot tabix ", chromosom, start, end, file = sys.stderr)
 
 
-		print("feature","CT","CG","CA","TC","TA","TG", sep="\t")
-		for key in mutations: 
-			print(key,
-			mutations[key][('C','T')]/ hits[key],
-			mutations[key][('C','G')]/  hits[key],
-			mutations[key][('C','A')]/  hits[key],
-			mutations[key][('T','C')]/  hits[key],
-			mutations[key][('T','A')]/  hits[key],
-			mutations[key][('T','G')]/  hits[key], sep="\t")	
+# 		print("feature","CT","CG","CA","TC","TA","TG", sep="\t")
+# 		for key in mutations: 
+# 			print(key,
+# 			mutations[key][('C','T')]/ hits[key],
+# 			mutations[key][('C','G')]/  hits[key],
+# 			mutations[key][('C','A')]/  hits[key],
+# 			mutations[key][('T','C')]/  hits[key],
+# 			mutations[key][('T','A')]/  hits[key],
+# 			mutations[key][('T','G')]/  hits[key], sep="\t")	
 
 
 
@@ -122,12 +122,7 @@ parser = argparse.ArgumentParser(
 	)
 
 parser.add_argument("file", type=str, help="bed.gz file indexed with tabix")
-parser.add_argument("-f","--feature", type=str, help="compute feature", default=None)
 
 args = parser.parse_args()
+wgs_signature(args.file)
 
-if args.feature is None:
-	wgs_signature(args.file)
-
-else:
-	feature_signature(args.file, args.feature)
