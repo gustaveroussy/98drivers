@@ -36,7 +36,7 @@
 		}
 
 
-		table.full 
+		.full 
 		{
 			width: 100%;
 
@@ -85,350 +85,247 @@
 		.rotation 
 		{
 			-webkit-transform: rotate(84deg);
-			-moz-transform: rotate(84deg);
-			-o-transform: rotate(84deg);
-			writing-mode: lr-tb;
-			width: 15px;
-		}
+-moz-transform: rotate(84deg);
+-o-transform: rotate(84deg);
+writing-mode: lr-tb;
+width: 15px;
+}
+
+.download tr td
+{
+	padding:2px;
+	vertical-align: text-top;
+}
 
 
 
-		
 
+</style>
 
-	</style>
-
-	<title>{{ title }} </title>
+<title>{{ title }} </title>
 </head>
 <body>
 
 
 	<div id="content">
 
-		<h1>Pancreas</h1>
+		<h1>{{sample}}</h1>
 
 		
 
 		<h2>Files to Download</h2>
 
-		<table>
-			
+		<table class="pure-table pure-table-bordered download full">
+			<thead>
+				<tr>
+					<th>Description</th>
+					<th>Files</th>
+
+				</tr>
+			</thead>
 			<tr>
 				<td>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quas, illo nostrum mollitia repellat in quibusdam commodi qui iusto maiores dolorem quam amet laborum facilis dolor! Numquam quo minima fugit.</p>
+					<p>
+						Contains mutation data input compressed as bgzip.
+
+					</p>
 				</td>
 				<td>
-					<a class="pure-button pure-button-primary" href="#">
-						<i class="fa fa-download" aria-hidden="true"></i> Pancreas.sorted.bed.gz</a>
+					<a class="" href="{{sample}}.bed.gz" >
+						<i class="fa fa-download" aria-hidden="true"></i>{{sample}}.bed.gz</a>
 					</td>
+					
 				</tr>
-
 				<tr>
 					<td>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quas, illo nostrum mollitia repellat in quibusdam commodi qui iusto maiores dolorem quam amet laborum facilis dolor! Numquam quo minima fugit.</p>
+						<p>
+							Attached tabix file for {{sample}}.bed.gz.
+						</p>
 					</td>
 					<td>
-						<a class="pure-button pure-button-primary" href="#">
-							<i class="fa fa-download" aria-hidden="true"></i> Pancreas.bed.gz</a>
+						<a class="" href="{{sample}}.bed.gz.tbi" >
+							<i class="fa fa-download" aria-hidden="true"></i> {{sample}}.bed.gz.tbi</a>
 						</td>
+
 					</tr>
 
-					<tr>
-						<td>
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt quas, illo nostrum mollitia repellat in quibusdam commodi qui iusto maiores dolorem quam amet laborum facilis dolor! Numquam quo minima fugit.</p>
+					<td>
+						<p>
+							Contains raw unsorted and unfiltered data. 
+						</p>
+					</td>
+					<td>
+						<a class="" href="{{sample}}.unsorted.bed.gz" >
+							<i class="fa fa-download" aria-hidden="true"></i> {{sample}}.unsorted.bed.gz</a>
 						</td>
-						<td>
-							<a class="pure-button pure-button-primary" href="#">
-								<i class="fa fa-download" aria-hidden="true"></i> Pancreas.sorted.bed.gz</a>
-							</td>
+
+					</tr>
+				</table>
+
+
+
+				<h2>Variant statistics </h2>
+
+
+				<!-- FIST BLOCK -->
+				<table class="pure-table full">
+					<tbody>
+						<tr class="pure-table-odd">
+							<td>Mutation count</td>
+							<td>{{stat.mutationCount}}</td>
+						</tr>
+						<tr>
+							<td>Sample count</td>
+							<td>{{stat.patientsCount}}</td>
+						</tr>
+
+						<tr class="pure-table-odd">
+							<td>Distinct Mutation Count</td>
+							<td>{{stat.cannMutationCount}}</td>
+						</tr>
+
+						<tr >
+							<td>Download</td>
+							<td><a href="{{sample}}.count"><i class="fa fa-download"></i> {{sample}}.count</a></td>
+						</tr>
+					</tbody>
+				</table>
+
+
+				<p style=" text-align: center "><img src="{{sample}}.count.png" alt=""></p>
+
+				<h2>Signature</h2>
+
+
+				<table class="pure-table full">
+					<tbody>
+						<tr>
+							<td>C to T</td>
+							<td>{{stat.CT}}</td>
+						</tr>
+
+						<tr class="pure-table-odd">
+							<td>T to A</td>
+							<td>{{stat.TA}}</td>
+						</tr>
+
+						<tr>
+							<td>T to C</td>
+							<td>{{stat.TC}}</td>
+						</tr>
+
+						<tr class="pure-table-odd">
+							<td>T to G</td>
+							<td>{{stat.TG}}</td>
+						</tr>
+
+						<tr>
+							<td>C to A</td>
+							<td>{{stat.CA}}</td>
+						</tr>
+
+						<tr class="pure-table-odd">
+							<td>C to G</td>
+							<td>{{stat.CG}}</td>
+						</tr>
+
+						<tr>
+							<td>transition</td>
+							<td>{{stat.transition}}</td>
+						</tr>
+
+						<tr class="pure-table-odd">
+							<td>transversion</td>
+							<td>{{stat.transversion}}</td>
+						</tr>
+						<tr >
+							<td>Download</td>
+							<td><a href="{{sample}}.signature"><i class="fa fa-download"></i> {{sample}}.signature</a></td>
 						</tr>
 
 
-					</table>
+					</tbody>
+				</table>
 
 
+				<p style=" text-align: center;margin-bottom:-100px"><img  src="{{sample}}.signature.png" alt=""></p>
+				<!-- Second BLOCK -->
+				
 
-					<h2>Variant statistics </h2>
-
-
-					<!-- FIST BLOCK -->
-					<table class="pure-table full">
-						<tbody>
-							<tr class="pure-table-odd">
-								<td>Mutation count</td>
-								<td>652101</td>
-							</tr>
-							<tr>
-								<td>Patient count</td>
-								<td>652101</td>
-							</tr>
-
-							<tr class="pure-table-odd">
-								<td>Cannonical Mutation Count</td>
-								<td>652101</td>
-							</tr>
-
-							<tr >
-								<td>Download</td>
-								<td><a href="#"><i class="fa fa-download"></i>Pancreas.introns.bed.gz</a></td>
-							</tr>
-						</tbody>
-					</table>
-
-
-					<p style=" text-align: center "><img src="count.png" alt=""></p>
-
-					<h2>Signature</h2>
-
-
-					<table class="pure-table full">
-						<tbody>
-							<tr>
-								<td>C to T</td>
-								<td>23</td>
-							</tr>
-
-							<tr class="pure-table-odd">
-								<td>T to A</td>
-								<td>23</td>
-							</tr>
-
-							<tr>
-								<td>T to C</td>
-								<td>23</td>
-							</tr>
-
-							<tr class="pure-table-odd">
-								<td>T to G</td>
-								<td>23</td>
-							</tr>
-
-							<tr>
-								<td>C to A</td>
-								<td>23</td>
-							</tr>
-
-							<tr class="pure-table-odd">
-								<td>C to G</td>
-								<td>23</td>
-							</tr>
-
-							<tr>
-								<td>transition</td>
-								<td>23</td>
-							</tr>
-
-							<tr class="pure-table-odd">
-								<td>transversion</td>
-								<td>23</td>
-							</tr>
-
-						</tbody>
-					</table>
-					
-
-					<p style=" text-align: center;margin-bottom:-100px"><img  src="signature.png" alt=""></p>
 					<!-- Second BLOCK -->
-					<h2>Features</h2>
 
-					<table class="pure-table full">
+					<h2>Mutation clusters</h2>
+
+					<table class="pure-table pure-table-bordered full">
 						<thead>
 							<tr>
-								<th>Feature</th>
-								<th>Variant count</th>
-								<th>Base Covered</th>
+								<th>Coordinate</th>
+								<th>Size</th>
+								<th>count</th>
+								<th>distinct count</th>
+								{% for feature in clusters[0][5:] %}
+								<th>{{feature}}</th>
+								{% endfor %}
 
-								<th>Download</th>
 							</tr>
 						</thead>
 
 						<tbody>
-							<tr >
-								<td>Exons</td>
-								<td>652101</td>
-								<td>1000000</td>
 
-								<td><a href="#"><i class="fa fa-download"></i>Pancreas.exon.bed.gz</a>
-								</td>
+							{% for item in clusters[1:] %}
+							<tr>
+								<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
+								<td>{{item[2]|int - item[1]|int}}</td>
+								<td>{{item[3]}}</td>
+								<td>{{item[4]}}</td>
+								
+								{% for index in range(5,item|length) %}
+								<td>{{item[index]}}</td>
+								{% endfor %}
+							</tr>
+							{% endfor %}
+
+						</tbody>
+					</table>
+
+					<!-- 3 BLOCK -->
+
+					<h2>Mutation peaks</h2>
+
+					<table class="pure-table pure-table-bordered full ">
+						<thead>
+							<tr>
+								<th><i class="fa fa-thumb-tack fa" aria-hidden="true"></i> Coordinate</th>
+								<th>Size</th>
+								<th>count</th>
+								<th>distinct count</th>
+								{% for feature in peaks[0][5:] %}
+								<th>{{feature}}</th>
+								{% endfor %}
+							</tr>
+						</thead>
+
+						<tbody>
+
+							{% for peak in peaks[1:] %}
+							<tr>
+								<td><a href="http://localhost:60151/goto?locus={{peak[0]}}:{{peak[1]}}-{{peak[2]}}">{{peak[0]}}:{{peak[1]}}-{{peak[2]}}</a></td>
+								<td>{{peak[2]|int - peak[1]|int}}</td>
+								<td>{{peak[3]}}</td>
+								<td>{{peak[4]}}</td>
+								{% for index in range(5,peak|length) %}
+								<td>{{peak[index]}}</td>
+								{% endfor %}
 								
 							</tr>
-							<tr>
-								<td>Introns</td>
-								<td>652101</td>
-								<td>1000000</td>
-
-								<td><a href="#"><i class="fa fa-download"></i>Pancreas.introns.bed.gz</a>
-								</tr>
-							</tbody>
-						</table>
-
-						<h3>Exons</h3>
-						<div class="pure-g">
-
-							<div class="pure-u-1-2 ">
-								<img style="float:left" src="signature.png" alt="">
-							</div>
-
-							<div class="pure-u-1-2">
-
-								<table class="pure-table full">
-
-									<tbody>
-										<tr class="pure-table-odd">
-											<td>Mutation count</td>
-											<td>652101</td>
-										</tr>
-										<tr>
-											<td>Patient count</td>
-											<td>652101</td>
-										</tr>
-
-										<tr class="pure-table-odd">
-											<td>Cannonical Mutation Count</td>
-											<td>652101</td>
-										</tr>
-
-										<tr>
-											<td>CT</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>TA</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>TC</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>TG</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>CA</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>CG</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>transition</td>
-											<td>23</td>
-										</tr>
-
-										<tr>
-											<td>transversion</td>
-											<td>23</td>
-										</tr>
-
-									</tbody>
-								</table>
-							</div>
-						</div>
+							{% endfor %}
 
 
-						<!-- Second BLOCK -->
+						</tbody>
+					</table>
 
-						<h2>Mutation clusters</h2>
+					<br><br>
+				</div>
 
-						<table class="pure-table pure-table-bordered full">
-							<thead>
-								<tr>
-									<th>Coordinate</th>
-									<th>Size</th>
-									<th>count</th>
-									<th>distinct count</th>
-									<th>Feature 1</th>
-									<th>Feature 2</th>
-
-								</tr>
-							</thead>
-
-							<tbody>
-								<tr>
-									<td><a href="#">chr4:1000000-20000000</a></td>
-									<td>200</td>
-									<td>34</td>
-									<td>32</td>
-									<td>4</td>
-									<td>3</td>     
-								</tr>
-								<tr>
-									<td><a href="#">chr4:1000000-20000000</a></td>
-									<td>200</td>
-									<td>34</td>
-									<td>32</td>
-									<td>4</td>
-									<td>3</td>     
-								</tr>
-
-							</tbody>
-						</table>
-
-						<!-- 3 BLOCK -->
-
-						<h2>Mutation peaks</h2>
-
-						<table class="pure-table pure-table-bordered full mutationPeaks">
-							<thead>
-								<tr>
-									<th><i class="fa fa-thumb-tack fa" aria-hidden="true"></i> Coordinate</th>
-									<th>count</th>
-									<th>distinct count</th>
-									<th>Ranges</th>
-									<th class="rotation">Feature</th>
-									<th class="rotation">Feature</th>
-									<th class="rotation">Feature</th>
-									<th class="rotation">Feature</th>
-
-								</tr>
-							</thead>
-
-							<tbody>
-								<tr>
-									<td><a href="#">chr4:1000000-2000</a></td>
-									<td>34</td>
-									<td>32</td>
-									<td style="padding:0px 0px 0px 0px"><img class="peaksrange", width="100%", height=100%, src="peaksrange.png" alt=""></td>
-									<td>4</td>
-									<td>3</td>   
-									<td>4</td>
-									<td>4</td>
-								</tr>
-								<tr>
-									<td><a href="#">chr4:1000000-20000000</a></td>
-									<td>34</td>
-									<td>32</td>
-									<td style="padding:0px 0px 0px 0px"><img class="peaksrange", width="100%", height=100%, src="peaksrange.png" alt=""></td>
-									<td>4</td>
-									<td>3</td>   
-									<td>4</td>
-									<td>4</td>
-								</tr>
-
-								<tr>
-									<td><a href="#">chr4:1000000-20000000</a></td>
-									<td>34</td>
-									<td>32</td>
-									<td style="padding:0px 0px 0px 0px"><img class="peaksrange", width="100%", height=100%, src="peaksrange.png" alt=""></td>
-									<td>4</td>
-									<td>3</td>   
-									<td>4</td>
-									<td>4</td>
-								</tr>
-
-							</tbody>
-						</table>
-
-						<br><br>
-					</div>
-
-				</body>
-				</html>
+			</body>
+			</html>

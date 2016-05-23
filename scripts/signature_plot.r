@@ -2,22 +2,21 @@
 library(fmsb)
 library(RColorBrewer)
 
-args <- commandArgs(trailingOnly = TRUE)
+# args <- commandArgs(trailingOnly = TRUE)
 filename = args[1]
 output   = args[2]
 
 color_theme = "Pastel1"
 
-raw    = read.csv(filename, header = T, sep = "\t")
-subraw = raw[c("CA","CG","CT","TA","TC","TG")] / raw$canno_mutation_count
-total  = raw["canno_mutation_count"]
+raw    = read.csv(filename, header = T, sep = "\t") 
+total  = 100
 
-maxmin = subset(subraw,F)
+maxmin = subset(raw,F)
 
 maxmin[1,] = rep(100, ncol(maxmin))
 maxmin[2,] = rep(0, ncol(maxmin))
 # 
-dat = subraw[,1:ncol(subraw)] * 100 
+dat = raw[,1:ncol(raw)] * 100 
 # 
 dat <- rbind(maxmin,dat)
 # 
@@ -49,6 +48,6 @@ radarchart(dat,
            title=basename(filename));
 
 
-legend("topright", NULL, legend=raw$feature, fil=brewer.pal(nrow(dat),color_theme))
+legend("topright", NULL, legend=colnames(raw), fil=brewer.pal(nrow(dat),color_theme))
 
 

@@ -1,0 +1,74 @@
+#!/bin/bash 
+
+# Usage Info 
+
+show_help()
+{
+cat <<EOF 
+Usage: ${0##*/} [-r] [FILE] > output.vcf
+Convert icgc single mutation tabular file ( tsv.gz ) to vcf file. You can specify if the source file is from open or restricted access.
+Input file comes from https://dcc.icgc.org/ and are simple somatic mutation. 
+   -h          display this help and exit
+   -r          icgc input file is a restricted format  
+EOF
+}
+
+
+from_open()
+{
+cat <<EOF 
+##fileformat=VCFv4.2
+##fileDate=`date +%Y%m%d`
+##source=IGV
+##reference=https://dcc.icgc.org/
+EOF
+
+# Print info fields
+#header $1|awk '{FS="\t";OFS=""}{print "##INFO=<ID=",$2,",Type=String,Number=1,Description=",$2,">"}'
+
+cat<<EOF
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+EOF
+
+# Print head
+cat <<EOF 
+#CHROM POS     ID        REF    ALT     QUAL FILTER INFO                              FORMAT
+EOF
+
+# print content 
+zcat $1|awk 'BEGIN{OFS="\t"; FS="\t"}NR>1{gsub( "-",".",$16);gsub( "-",".",$17); print "chr"$9,$10,$1,$16,$17,$18,"PASS","DP="$18";AF="$19}' 
+
+}
+
+
+header()
+{
+	zcat $1|head -n 1| tr "\t" "\n" | awk 'BEGIN{OFS="\t"} $1 !~/(chromosome|chromosome_start|chromosome_end|mutated_from_allele|mutated_to_allele|quality_score)/{print NR,$0}'
+}
+
+
+
+#==================================================================================
+while getopts ":hr" opt; do 
+case "$opt" in 
+	h) 
+	show_help
+	exit 0 
+	;;
+
+	r)
+	$IS_RESTRICTED=1 
+	;; 
+	'?')
+	show_help >&2 
+	exit 1 
+	;;
+esac 
+done
+
+
+if [ $OPTIND -eq 1 ]; then show_help >&2; exit 1; fi
+
+shift "$((OPTIND-1))"
+from_open $1

@@ -1,0 +1,75 @@
+#!/bin/bash 
+
+# Usage Info 
+# ICGC : first base of chromosom start a 1 , size = end - start + 1 
+# BED : first base is 0 , end is last +1 . size = end - start 
+
+show_help()
+{
+cat <<EOF 
+Usage: ${0##*/} [-r] [FILE] > output.bed
+Convert icgc single mutation tabular file ( tsv.gz ) to bed file. You can specify if the source file is from open or restricted access.
+Input file comes from https://dcc.icgc.org/ and are simple somatic mutation. 
+   -h          display this help and exit
+   -r          icgc input file is a restricted format  
+EOF
+}
+
+from_restricted()
+{
+#9 		= chromosom
+#10 	= start based 1 
+#11		= end 
+#2 		= Donor 
+#19		= reference allele
+#20		= alternative allele
+
+zcat $FILENAME|awk 'BEGIN{OFS="\t"; FS="\t"}NR>1{print $9,$10-1,$11,$2,$19,$20}' 
+}
+
+
+from_open()
+{
+#9 		= chromosom
+#10 	= start based 1 
+#11		= end 
+#2 		= Donor 
+#16		= reference allele
+#17		= alternative allele
+
+zcat $FILENAME|awk 'BEGIN{OFS="\t"; FS="\t"}NR>1{print "chr"$9,$10-1,$10,$2,$16,$17}' 
+
+}
+
+IS_RESTRICTED=0
+
+while getopts ":hr" opt; do 
+case "$opt" in 
+	h) 
+	show_help
+	exit 0 
+	;;
+
+	r)
+	$IS_RESTRICTED=1 
+	;; 
+	'?')
+	show_help >&2 
+	exit 1 
+	;;
+esac 
+done
+
+if [ $OPTIND -eq 1 ]; then show_help >&2; exit 1; fi
+
+shift "$((OPTIND-1))"
+
+if [ $IS_RESTRICTED -eq 1 ]
+	then 
+		from_open $1 
+	else 
+		from_restricted $1
+fi
+
+
+

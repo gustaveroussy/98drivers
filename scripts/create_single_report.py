@@ -24,43 +24,29 @@ def read_dict(file):
 			dictionnary[line[0]] = line[1]
 	return dictionnary
 
+
 def read_table(file):
 	data = []
-	with open(file, "r") as file:
-		reader = csv.reader(file,delimiter="\t")
-		header = next(reader)
+	with open(file,"r") as file:
+		reader = csv.reader(file, delimiter="\t")
 
-		for line in reader:
-			item = {}
-			for index in range(len(header)):
-				item[header[index]] = line[index]
-
-			data.append(item)
-
+		for line in reader : 
+			data.append(line)
 	return data
 
 
 
-
 #====================================================================================
-def create_single_report(sample, basedir, template_dir):
+def create_single_report(name, basedir, template_dir):
 
 	j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
 
-	# Read wgs_max_score 
-
-
-	wgs_info      = read_table("{basedir}/{sample}.wgs.info".format(sample = sample, basedir = basedir))
-	features_info = read_table("{basedir}/{sample}.all.info".format(sample = sample, basedir = basedir))
-	peaks_data    = read_table("{basedir}/{sample}.wgs.peaks.annotated.bed".format(sample = sample, basedir = basedir))
-
-
-
-	print(j2_env.get_template("test.html").render(
-	sample   		= sample,
-	wgs_info 		= wgs_info,
-	features_info 	= features_info,
-	peaks_data       = peaks_data
+	
+	print(j2_env.get_template("single_report.html").render(
+	sample   		= name,
+	stat            = read_dict("{}.stat".format(name)),
+	clusters        = read_table("{}.cluster.annotate.entropy.bed".format(name)),
+	peaks           = read_table("{}.peaks.annotate.bed".format(name))
 		))
 
 

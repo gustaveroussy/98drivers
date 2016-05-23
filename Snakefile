@@ -3,6 +3,13 @@ import os
 #Convert icgc tabular snp to bed file 
 #chr start end patient reference alternative 
 
+# Get features base names
+features_base_names = [os.path.basename(i)[:-4] for i in config.features]
+
+# Create output directory 
+
+
+
 rule icgc2bed:
 	input:
 		"{name}.tsv.gz"
@@ -18,7 +25,8 @@ rule sort_bed:
 	output:
 		"{name}.bed.gz"
 	shell:
-		"zcat {input}|sort -u|bedtools sort -i stdin | bgzip > {output}"
+		"zcat {input}|sort -u|bedtools sort -i stdin | bgzip > {output};"
+		"tabix -p bed {output}"
 
 # Create tabix index 
 rule tabix:
@@ -33,11 +41,11 @@ rule tabix:
 # Count mutation rate 
 rule count :
 	input:
-		"{name}.bed.gz"
+		"{name}.bed.gz",
 	output:
 		"{name}.count"
 	shell:
-		"python3 scripts/sliding_window.py Pancreas.bed.gz -g {config.genome_sizes} -w {config.mutation_range} > {output}"
+		"python3 scripts/sliding_window.py {input} -g {config.genome_sizes} -w {config.mutation_range} > {output}"
 
 # Compute signature 
 rule signature:
@@ -47,6 +55,22 @@ rule signature:
 		"{name}.signature"
 	shell:
 		"python3 scripts/signature.py {input} > {output}"
+
+rule plot_count:
+	input:
+		"{name}.count"
+	output:
+		"{name}.count.png"
+	shell:
+		"Rscript scripts/plot_coverage.r {input} {output}"
+
+rule plot_signature:
+	input:
+		"{name}.signature"
+	output:
+		"{name}.signature.png"
+	shell:
+		"Rscript scripts/plot_signature.r {input} {output}"
 
 # Compute stats 
 rule stats:
@@ -113,7 +137,7 @@ rule annotate_peaks:
 
 	shell:
 		# print first header
-		"echo -e '#chromosome\tstart\tend\tcount\t{params.feature_names}'> {output};" 
+		"echo -e '#chromosome\tstart\tend\tcount\tcannCount\t{params.feature_names}'> {output};" 
 		# annotate peaks 
 		"bedtools annotate -counts -i {input} -files {params.feature_paths} >> {output}" 
 
@@ -122,7 +146,7 @@ rule annotate_cluster:
 	input:
 		"{name}.cluster.bed"
 	output:
-		"{name}.cluster.annotate.bed"
+		"{name}.cluster.annotate.bed",
 	params:
 		# Get features path in one line separated by tabular 
 		feature_paths = "\t".join(file for file in config.features),
@@ -131,11 +155,38 @@ rule annotate_cluster:
 
 	shell:
 		# Print first header
-		"echo -e '#chromosome\tstart\tend\tfraction\t{params.feature_names}'> {output};" 
+		"echo -e '#chromosome\tstart\tend\tcount\tcannCount\t{params.feature_names}'> {output};" 
 		# annotate only cluster allowed by config 
 		"cat {input}|awk '$4 > {config.c_count} && $5 > {config.p_count}'|bedtools annotate -i stdin -files {params.feature_paths} >> {output}" 
 
+rule annotate_entropy_cluster:
+	input:
+		src="{name}.bed.gz",
+		region="{name}.cluster.annotate.bed"
 
+	output:
+		"{name}.cluster.annotate.entropy.bed",
+	shell:
+		"python3 scripts/bed_entropy.py {input.src} -r {input.region} > {output}"
+	
+
+rule create_report:
+	input:
+		"{name}.stat",
+		"{name}.cluster.annotate.entropy.bed",
+		"{name}.peaks.annotate.bed",
+		"{name}.signature.png",
+		"{name}.count.png"
+
+	output:
+		"{name}.html"
+	shell:
+		"python3 scripts/create_single_report.py {wildcards.name} --basedir . --template_dir templates > {output};"
+		
+
+
+
+	
 
 
 # rule create_feature:
