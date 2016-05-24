@@ -1,8 +1,11 @@
 
 # Features 
 features = [
-	"features/exons.bed",
-	"features/introns.bed"
+"features/exons.bed",
+"features/introns.bed",
+"features/enhancer.bed",
+"features/cpgIsland.bed",
+"features/dnase.bed",
 ]
 
 genome_sizes = "features/genome.size"

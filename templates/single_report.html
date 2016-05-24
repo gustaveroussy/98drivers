@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/side.css">
 
 
 
@@ -13,7 +14,7 @@
 
 		#content
 		{
-			width: 980px;
+			width: 1000px;
 			margin:auto;
 			background-color: white;
 
@@ -113,7 +114,7 @@ width: 15px;
 
 		
 
-		<h2>Files to Download</h2>
+		<h2>Download</h2>
 
 		<table class="pure-table pure-table-bordered download full">
 			<thead>
@@ -132,7 +133,7 @@ width: 15px;
 				</td>
 				<td>
 					<a class="" href="{{sample}}.bed.gz" >
-						<i class="fa fa-download" aria-hidden="true"></i>{{sample}}.bed.gz</a>
+						<i class="fa fa-download" aria-hidden="true"></i> {{sample}}.bed.gz</a>
 					</td>
 					
 				</tr>
@@ -164,7 +165,8 @@ width: 15px;
 
 
 
-				<h2>Variant statistics </h2>
+				<h2>Variant count </h2>
+				<p><a href="{{sample}}.count"><i class="fa fa-download"></i> {{sample}}.count</a></p>
 
 
 				<!-- FIST BLOCK -->
@@ -183,11 +185,6 @@ width: 15px;
 							<td>Distinct Mutation Count</td>
 							<td>{{stat.cannMutationCount}}</td>
 						</tr>
-
-						<tr >
-							<td>Download</td>
-							<td><a href="{{sample}}.count"><i class="fa fa-download"></i> {{sample}}.count</a></td>
-						</tr>
 					</tbody>
 				</table>
 
@@ -195,6 +192,7 @@ width: 15px;
 				<p style=" text-align: center "><img src="{{sample}}.count.png" alt=""></p>
 
 				<h2>Signature</h2>
+				<p ><a href="{{sample}}.signature"><i class="fa fa-download"></i> {{sample}}.signature</a></p>
 
 
 				<table class="pure-table full">
@@ -238,49 +236,59 @@ width: 15px;
 							<td>transversion</td>
 							<td>{{stat.transversion}}</td>
 						</tr>
-						<tr >
-							<td>Download</td>
-							<td><a href="{{sample}}.signature"><i class="fa fa-download"></i> {{sample}}.signature</a></td>
-						</tr>
-
-
 					</tbody>
 				</table>
+
 
 
 				<p style=" text-align: center;margin-bottom:-100px"><img  src="{{sample}}.signature.png" alt=""></p>
 				<!-- Second BLOCK -->
 				
 
-					<!-- Second BLOCK -->
+				<!-- Second BLOCK -->
 
-					<h2>Mutation clusters</h2>
+				<h2>Mutation clusters</h2>
+				<p><a href="{{sample}}.cluster.bed"><i class="fa fa-download"></i> {{sample}}.cluster.bed</a></p>
+				<p><a href="{{sample}}.cluster.annotate.bed"><i class="fa fa-download"></i> {{sample}}.cluster.annotate.bed</a></p>
+				<p><a href="{{sample}}.cluster.annotate.entropy.bed"><i class="fa fa-download"></i> {{sample}}.cluster.annotate.entropy.bed</a></p>
 
-					<table class="pure-table pure-table-bordered full">
-						<thead>
-							<tr>
-								<th>Coordinate</th>
-								<th>Size</th>
-								<th>count</th>
-								<th>distinct count</th>
-								{% for feature in clusters[0][5:] %}
-								<th>{{feature}}</th>
-								{% endfor %}
+				<table class="pure-table pure-table-bordered full">
+					<thead>
+						<tr>
+							<th>IGV</th>
+							<th>Size</th>
+							<th>count</th>
+							<th>dcount</th>
+							{% for feature in clusters[0][5:] %}
+							<th>{{feature}}</th>
+							{% endfor %}
 
-							</tr>
-						</thead>
+						</tr>
+					</thead>
 
-						<tbody>
+					<tbody>
 
-							{% for item in clusters[1:] %}
-							<tr>
-								<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}:{{item[1]}}-{{item[2]}}</a></td>
-								<td>{{item[2]|int - item[1]|int}}</td>
-								<td>{{item[3]}}</td>
-								<td>{{item[4]}}</td>
-								
-								{% for index in range(5,item|length) %}
-								<td>{{item[index]}}</td>
+						{% for item in clusters[1:] %}
+						<tr>
+							<td><a href="http://localhost:60151/goto?locus={{item[0]}}:{{item[1]}}-{{item[2]}}">{{item[0]}}</a></td>
+							<td>{{item[2]|int - item[1]|int}}</td>
+							<td>{{item[3]}}</td>
+							<td>{{item[4]}}</td>
+
+							{% for index in range(5,item|length) %}
+							{% set value = item[index]|float * 100 %}
+							{% if value > 5 %}
+							<td style="color:red">
+								{% else %}
+								<td style="color:green">
+
+									{% endif %}
+
+									{{value|round(2)}}
+
+								</td>
+
+
 								{% endfor %}
 							</tr>
 							{% endfor %}
@@ -291,14 +299,16 @@ width: 15px;
 					<!-- 3 BLOCK -->
 
 					<h2>Mutation peaks</h2>
+					<p><a href="{{sample}}.peaks.bed"><i class="fa fa-download"></i> {{sample}}.peaks.bed</a></p>
+					<p><a href="{{sample}}.peaks.annotate.bed"><i class="fa fa-download"></i> {{sample}}.peaks.annotate.bed</a></p>
 
 					<table class="pure-table pure-table-bordered full ">
 						<thead>
 							<tr>
-								<th><i class="fa fa-thumb-tack fa" aria-hidden="true"></i> Coordinate</th>
+								<th>IGV</th>
 								<th>Size</th>
 								<th>count</th>
-								<th>distinct count</th>
+								<th>dcount</th>
 								{% for feature in peaks[0][5:] %}
 								<th>{{feature}}</th>
 								{% endfor %}
@@ -309,23 +319,31 @@ width: 15px;
 
 							{% for peak in peaks[1:] %}
 							<tr>
-								<td><a href="http://localhost:60151/goto?locus={{peak[0]}}:{{peak[1]}}-{{peak[2]}}">{{peak[0]}}:{{peak[1]}}-{{peak[2]}}</a></td>
+								<td><a href="http://localhost:60151/goto?locus={{peak[0]}}:{{peak[1]}}-{{peak[2]}}">{{peak[0]}}</a></td>
 								<td>{{peak[2]|int - peak[1]|int}}</td>
 								<td>{{peak[3]}}</td>
 								<td>{{peak[4]}}</td>
 								{% for index in range(5,peak|length) %}
-								<td>{{peak[index]}}</td>
+
+								{% if peak[index]|int >= 1 %}
+								<td style="color:red">
+									{% else %}
+									<td style="color:green">
+
+										{% endif %}
+										{{peak[index]}}
+									</td>
+									{% endfor %}
+
+								</tr>
 								{% endfor %}
-								
-							</tr>
-							{% endfor %}
 
 
-						</tbody>
-					</table>
+							</tbody>
+						</table>
 
-					<br><br>
-				</div>
+						<br><br>
+					</div>
 
-			</body>
-			</html>
+				</body>
+				</html>

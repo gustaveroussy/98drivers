@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+
+	<link rel="stylesheet" href="css/side.css">
+
+
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script> 
+
+	<title>All</title>
+
+	<style>
+		
+
+
+
+	</style>
+
+
+</head>
+<body>
+
+
+
+
+<div id="layout">
+    <!-- Menu toggle -->
+    <a href="#menu" id="menuLink" class="menu-link">
+        <!-- Hamburger icon -->
+        <span></span>
+    </a>
+
+    <div id="menu">
+        <div class="pure-menu">
+        <img src="http://www.unicancer.fr/sites/default/files/logo_gustave_roussy_250_0.jpg" width="200px" alt="">
+
+            <ul class="pure-menu-list">
+
+				{% for page in pages %}
+
+                <li class="pure-menu-item">
+                <a href="#" class="pure-menu-link"
+                >{{page}}</a>
+                </li>
+				
+                {% endfor %}
+
+            </ul>
+        </div>
+    </div>
+
+    <div id="main">
+
+
+
+
+    </div>
+</div>
+
+
+
+<script>
+	
+$(document).ready(function(){
+    $(".pure-menu-link").click(function(){
+        var page = $(this).text();
+    	$("#main").load(page);
+    });
+}); 
+
+</script>
+	
+</body>
+</html>
